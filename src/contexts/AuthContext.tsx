@@ -99,31 +99,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         default:
           router.push('/dashboard');
       }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Login failed');
     }
   };
 
   const register = async (data: RegisterData) => {
     try {
       // Prepare the payload according to backend requirements
-      const payload: any = {
+      const payload: Record<string, string> = {
         name: data.name,
         email: data.email,
         password: data.password,
         userType: data.userType,
-        phoneNumber: data.phoneNumber,
+        phoneNumber: data.phoneNumber || '',
       };
 
       // Add role-specific fields
       if (data.userType === 'student') {
-        payload.studentID = data.studentID;
-        payload.universityID = data.universityID;
+        payload.studentID = data.studentID || '';
+        payload.universityID = data.universityID || '';
       } else if (data.userType === 'recruiter') {
         payload.recruiterID = data.recruiterID || `REC${Date.now()}`; // Generate if not provided
-        payload.companyID = data.companyID;
+        payload.companyID = data.companyID || '';
       } else if (data.userType === 'university_admin') {
-        payload.universityID = data.universityID;
+        payload.universityID = data.universityID || '';
       }
 
       const response = await api.post('/auth/register', payload);
@@ -135,8 +135,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Redirect to verify email page
       router.push('/dashboard');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Registration failed');
     }
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -217,7 +217,7 @@ export default function UniversityDashboard() {
     if (companies.length > 0) {
       filterCompanies();
     }
-  }, [companies, searchQuery, industryFilter]);
+  }, [filterCompanies]);
 
   const fetchDashboardData = async () => {
     try {
@@ -258,17 +258,17 @@ export default function UniversityDashboard() {
     try {
       const response = await api.get("/companies");
       setCompanies(response.data.companies);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to fetch companies:", error);
       setCompaniesError(
-        error.response?.data?.message || "Failed to fetch companies"
+        error instanceof Error ? error.message : "Failed to fetch companies"
       );
     } finally {
       setCompaniesLoading(false);
     }
   };
 
-  const filterCompanies = () => {
+  const filterCompanies = useCallback(() => {
     let filtered = companies;
 
     // Search filter
@@ -292,7 +292,11 @@ export default function UniversityDashboard() {
     }
 
     setFilteredCompanies(filtered);
-  };
+  }, [companies, searchQuery, industryFilter]);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
   const getUniqueIndustries = () => {
     const industries = companies
@@ -776,7 +780,7 @@ export default function UniversityDashboard() {
                   <CardHeader>
                     <CardTitle>Company Directory</CardTitle>
                     <CardDescription>
-                      Browse and manage your university's industry partners
+                      Browse and manage your university&apos;s industry partners
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
