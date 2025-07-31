@@ -8,7 +8,7 @@ This is the frontend application for the CareerLaunch platform, built with Next.
 
 - Node.js 18+ 
 - Yarn package manager
-- The backend server running on http://localhost:8000
+- The backend server running on http://localhost:7700
 
 ### Installation
 
