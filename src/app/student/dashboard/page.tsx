@@ -252,9 +252,9 @@ export default function StudentDashboard() {
                       ))}
                     </div>
                     <Link href="/student/applications">
-                      <Button variant="link" className="mt-4 p-0">
-                        View all applications →
-                      </Button>
+                    <Button variant="link" className="mt-4 p-0">
+                    View all applications →
+                    </Button>
                     </Link>
                   </CardContent>
                 </Card>
@@ -286,10 +286,10 @@ export default function StudentDashboard() {
                         Browse Jobs
                       </Button>
                     </Link>
-                    <Link href="/student/skills">
+                    <Link href="/student/analytics">
                       <Button variant="outline" className="w-full justify-start">
                         <TrendingUp className="mr-2 h-4 w-4" />
-                        Update Skills
+                        View Analytics
                       </Button>
                     </Link>
                   </CardContent>
