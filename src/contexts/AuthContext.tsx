@@ -31,6 +31,9 @@ interface RegisterData {
   universityID?: string;
   studentID?: string;
   recruiterID?: string;
+  // These are used in the form but not sent to backend
+  companyName?: string;
+  universityName?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -96,7 +99,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (data: RegisterData) => {
     try {
-      const response = await api.post('/auth/register', data);
+      // Prepare the payload according to backend requirements
+      const payload: any = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        userType: data.userType,
+        phoneNumber: data.phoneNumber,
+      };
+
+      // Add role-specific fields
+      if (data.userType === 'student') {
+        payload.studentID = data.studentID;
+        payload.universityID = data.universityID;
+      } else if (data.userType === 'recruiter') {
+        payload.recruiterID = data.recruiterID || `REC${Date.now()}`; // Generate if not provided
+        payload.companyID = data.companyID;
+      } else if (data.userType === 'university_admin') {
+        payload.universityID = data.universityID;
+      }
+
+      const response = await api.post('/auth/register', payload);
       const { accessToken, refreshToken, user } = response.data;
       
       localStorage.setItem('accessToken', accessToken);
