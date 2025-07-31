@@ -26,7 +26,7 @@ cp .env.local.example .env.local
 
 4. Update the `.env.local` file with your backend URL if different from default:
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:7700
 ```
 
 ### Running the Application
