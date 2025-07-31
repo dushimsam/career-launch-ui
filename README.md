@@ -12,13 +12,10 @@ This is the frontend application for the CareerLaunch platform, built with Next.
 
 ### Installation
 
-1. Clone the repository and navigate to the frontend directory:
+1. Clone & Install dependencies:
 ```bash
-cd /Users/samueldushimimana/Documents/alu/projects/career-launch-ui
-```
-
-2. Install dependencies:
-```bash
+git clone https://github.com/dushimsam/career-launch-ui.git
+cd career-launch-ui
 yarn install
 ```
 
@@ -61,78 +58,6 @@ src/
     └── utils.ts         # Utility functions
 ```
 
-## Features Implemented
-
-### Authentication
-- User registration with role selection (Student, Recruiter, University Admin)
-- Login with email/password
-- JWT token management with refresh
-- Protected routes based on user roles
-- Email verification flow
-- GitHub OAuth integration ready
-
-### Pages
-- Landing page with feature highlights
-- Login page
-- Registration page with role-specific fields
-- Student dashboard with stats and quick actions
-- Recruiter dashboard with job management
-- Email verification page
-
-### Components
-- Reusable UI components using Radix UI primitives
-- Consistent styling with Tailwind CSS
-- Dark mode support
-- Responsive design
-
-## Next Steps
-
-1. **Complete Profile Management**
-   - Student profile editing
-   - Portfolio integration
-   - Skills management
-
-2. **Job Management**
-   - Job listing page
-   - Job posting for recruiters
-   - Application flow
-
-3. **Search & Filtering**
-   - Advanced search for jobs
-   - Candidate filtering for recruiters
-
-4. **Communication**
-   - In-app messaging
-   - Notification system
-
-5. **Analytics**
-   - Student analytics dashboard
-   - Recruiter analytics
-
-## API Integration
-
-The frontend is designed to work with the NestJS backend. Make sure the backend is running before starting the frontend.
-
-Key API endpoints used:
-- `/auth/register` - User registration
-- `/auth/login` - User login
-- `/auth/profile` - Get current user
-- `/auth/verify-email` - Email verification
-- `/auth/refresh` - Token refresh
-
-## Deployment
-
-For production deployment:
-
-```bash
-yarn build
-yarn start
-```
-
-Consider deploying to:
-- Vercel (recommended for Next.js)
-- Cloudflare Pages
-- Any Node.js hosting platform
 
 ## Contributing
 
