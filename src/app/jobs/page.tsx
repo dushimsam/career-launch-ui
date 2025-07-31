@@ -35,7 +35,7 @@ interface Job {
     location: string;
   };
   location: string;
-  type: 'full-time' | 'part-time' | 'contract' | 'internship';
+  jobType: 'full-time' | 'part-time' | 'contract' | 'internship';
   salary?: {
     min: number;
     max: number;
@@ -43,7 +43,7 @@ interface Job {
   };
   description: string;
   requirements: string[];
-  skills: string[];
+  skillsRequired: string[];
   postedDate: string;
   applicationDeadline: string;
   applicants: number;
@@ -191,7 +191,7 @@ export default function JobsPage() {
             location: 'Kigali, Rwanda',
           },
           location: 'Kigali, Rwanda',
-          type: 'full-time',
+          jobType: 'full-time',
           salary: {
             min: 1500000,
             max: 2500000,
@@ -199,7 +199,7 @@ export default function JobsPage() {
           },
           description: 'We are looking for a skilled Frontend Developer to join our growing team and help build amazing web applications using modern technologies.',
           requirements: ['5+ years experience', 'React expertise', 'TypeScript proficiency'],
-          skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Node.js'],
+          skillsRequired: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Node.js'],
           postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
           applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           applicants: 23,
@@ -213,10 +213,10 @@ export default function JobsPage() {
             location: 'Kigali, Rwanda',
           },
           location: 'Kigali, Rwanda',
-          type: 'internship',
+          jobType: 'internship',
           description: 'Join our innovative team as a Full Stack Developer Intern and gain hands-on experience in building scalable web applications.',
           requirements: ['Final year student or recent graduate', 'Basic web development knowledge'],
-          skills: ['JavaScript', 'Python', 'React', 'Django', 'PostgreSQL'],
+          skillsRequired: ['JavaScript', 'Python', 'React', 'Django', 'PostgreSQL'],
           postedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
           applicationDeadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
           applicants: 45,
@@ -230,7 +230,7 @@ export default function JobsPage() {
             location: 'Nairobi, Kenya',
           },
           location: 'Nairobi, Kenya',
-          type: 'full-time',
+          jobType: 'full-time',
           salary: {
             min: 80000,
             max: 120000,
@@ -238,7 +238,7 @@ export default function JobsPage() {
           },
           description: 'We need a talented Backend Engineer to design and implement robust server-side applications and APIs.',
           requirements: ['3+ years backend experience', 'API design expertise', 'Cloud experience'],
-          skills: ['Node.js', 'Python', 'AWS', 'MongoDB', 'Docker', 'Kubernetes'],
+          skillsRequired: ['Node.js', 'Python', 'AWS', 'MongoDB', 'Docker', 'Kubernetes'],
           postedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           applicationDeadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
           applicants: 67,
@@ -262,7 +262,7 @@ export default function JobsPage() {
       filtered = filtered.filter(job =>
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+        job.skillsRequired.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -273,7 +273,7 @@ export default function JobsPage() {
     }
 
     if (jobTypeFilter) {
-      filtered = filtered.filter(job => job.type === jobTypeFilter);
+      filtered = filtered.filter(job => job.jobType === jobTypeFilter);
     }
 
     setFilteredJobs(filtered);

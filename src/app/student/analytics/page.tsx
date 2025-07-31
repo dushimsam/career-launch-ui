@@ -308,7 +308,7 @@ export default function AnalyticsPage() {
                             outerRadius={80}
                             fill="#8884d8"
                             dataKey="value"
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            label={({ name, percent }) => `${name} ${(percent ? percent * 100 : 0).toFixed(0)}%`}
                           >
                             {applicationStatusData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -505,50 +505,6 @@ export default function AnalyticsPage() {
                     </CardContent>
                   </Card>
                 </div>
-
-                {/* Achievement Badges */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Award className="w-5 h-5" />
-                      Achievements & Milestones
-                    </CardTitle>
-                    <CardDescription>
-                      Celebrate your job search progress
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {[
-                        { name: 'Early Bird', description: 'First application sent', earned: true },
-                        { name: 'Persistent', description: '25 applications sent', earned: true },
-                        { name: 'Hot Profile', description: '100+ profile views', earned: true },
-                        { name: 'Interview Pro', description: '5 interviews scheduled', earned: false },
-                        { name: 'Quick Responder', description: 'Avg response < 24h', earned: true },
-                        { name: 'Skill Master', description: '10+ verified skills', earned: false },
-                        { name: 'Network Builder', description: '50+ connections', earned: false },
-                        { name: 'Job Secured', description: 'First offer received', earned: false },
-                      ].map((badge, index) => (
-                        <div
-                          key={index}
-                          className={`text-center p-4 rounded-lg ${
-                            badge.earned 
-                              ? 'bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20' 
-                              : 'bg-gray-100 dark:bg-gray-800 opacity-50'
-                          }`}
-                        >
-                          <Trophy className={`w-8 h-8 mx-auto mb-2 ${
-                            badge.earned ? 'text-yellow-600' : 'text-gray-400'
-                          }`} />
-                          <p className="font-medium text-sm">{badge.name}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                            {badge.description}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
             </Tabs>
           </div>

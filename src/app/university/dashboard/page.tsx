@@ -125,6 +125,7 @@ interface Company {
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  employeeCount?: number;
   _count?: {
     jobs: number;
     applications: number;
@@ -534,7 +535,7 @@ export default function UniversityDashboard() {
                             fill="#8884d8"
                             dataKey="value"
                             label={({ name, percent }) =>
-                              `${name} ${(percent * 100).toFixed(0)}%`
+                              `${name} ${(percent !== undefined ? (percent * 100).toFixed(0) : 0)}%`
                             }
                           >
                             {departmentDistribution.map((entry, index) => (

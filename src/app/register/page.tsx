@@ -171,9 +171,6 @@ export default function RegisterPage() {
                 {...register('studentID')} 
                 disabled={isLoading} 
               />
-              {errors.userType === 'student' && errors.studentID && (
-                <p className="text-sm text-red-500 mt-1">{errors.studentID.message}</p>
-              )}
             </motion.div>
             
             <motion.div key="universityID" variants={itemVariants} className="space-y-2">
@@ -200,9 +197,6 @@ export default function RegisterPage() {
                   </Select>
                 )}
               />
-              {errors.userType === 'student' && errors.universityID && (
-                <p className="text-sm text-red-500 mt-1">{errors.universityID.message}</p>
-              )}
             </motion.div>
           </>
         );
@@ -233,9 +227,6 @@ export default function RegisterPage() {
                 </Select>
               )}
             />
-            {errors.userType === 'recruiter' && errors.companyID && (
-              <p className="text-sm text-red-500 mt-1">{errors.companyID.message}</p>
-            )}
           </motion.div>
         );
         
@@ -265,9 +256,6 @@ export default function RegisterPage() {
                 </Select>
               )}
             />
-            {errors.userType === 'university_admin' && errors.universityID && (
-              <p className="text-sm text-red-500 mt-1">{errors.universityID.message}</p>
-            )}
           </motion.div>
         );
         

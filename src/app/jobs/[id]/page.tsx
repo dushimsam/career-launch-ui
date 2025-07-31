@@ -44,7 +44,7 @@ interface JobDetails {
     industry: string;
   };
   location: string;
-  type: 'full-time' | 'part-time' | 'contract' | 'internship';
+  jobType: 'full-time' | 'part-time' | 'contract' | 'internship';
   salary?: {
     min: number;
     max: number;
@@ -54,7 +54,7 @@ interface JobDetails {
   responsibilities: string[];
   requirements: string[];
   preferredQualifications: string[];
-  skills: string[];
+  skillsRequired: string[];
   benefits: string[];
   postedDate: string;
   applicationDeadline: string;

@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user);
       
       // Redirect to verify email page
-      router.push('/verify-email');
+      router.push('/dashboard');
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Registration failed');
     }
