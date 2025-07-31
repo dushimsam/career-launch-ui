@@ -3,12 +3,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { normalizeUserType } from '@/lib/userUtils';
 
 interface User {
   userID: string;
   email: string;
   name: string;
-  type: 'student' | 'recruiter' | 'university_admin' | 'platform_admin';
+  type: 'student' | 'recruiter' | 'university_admin' | 'universityadmin' | 'platform_admin' | 'Student' | 'Recruiter' | 'UniversityAdmin' | 'PlatformAdmin';
   isVerified: boolean;
 }
 
@@ -26,7 +27,7 @@ interface RegisterData {
   email: string;
   password: string;
   phoneNumber?: string;
-  userType: 'student' | 'recruiter' | 'university_admin' | 'platform_admin';
+  userType: 'student' | 'recruiter' | 'university_admin' | 'platform_admin'  | 'universityadmin';
   companyID?: string;
   universityID?: string;
   studentID?: string;
@@ -56,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const response = await api.get('/auth/profile');
+      console.log('User data from API:', response.data.user);
       setUser(response.data.user);
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -73,10 +75,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      console.log('User logged in:', user);
       setUser(user);
       
+      // Normalize user type to lowercase with underscores
+      const normalizedType = normalizeUserType(user.type);
+      console.log('Normalized user type:', normalizedType);
+      
       // Redirect based on user type
-      switch (user.type) {
+      switch (normalizedType) {
         case 'student':
           router.push('/student/dashboard');
           break;

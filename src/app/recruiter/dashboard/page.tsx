@@ -64,10 +64,6 @@ export default function RecruiterDashboard() {
                   </p>
                 </div>
               </div>
-              <Button variant="ghost" onClick={logout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
             </div>
           </div>
         </header>

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { normalizeUserType } from '@/lib/userUtils';
 import { 
   Menu, 
   X, 
@@ -16,7 +17,8 @@ import {
   BarChart,
   LogOut,
   User,
-  Settings
+  Settings,
+  Building
 } from 'lucide-react';
 
 const publicNavItems = [
@@ -39,16 +41,34 @@ const recruiterNavItems = [
   { href: '/recruiter/analytics', label: 'Analytics', icon: BarChart },
 ];
 
+const universityAdminNavItems = [
+  { href: '/university/dashboard', label: 'Dashboard', icon: Home },
+  { href: '/university/students', label: 'Students', icon: Users },
+  { href: '/university/placements', label: 'Placements', icon: Briefcase },
+  { href: '/university/partners', label: 'Partners', icon: Building },
+];
+
+const adminNavItems = [
+  { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
+];
+
 export default function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = user
-    ? user.type === 'student'
+    ? normalizeUserType(user.type) === 'student'
       ? studentNavItems
-      : user.type === 'recruiter'
+      : normalizeUserType(user.type) === 'recruiter'
       ? recruiterNavItems
+      : normalizeUserType(user.type) === 'universityadmin'
+      ? universityAdminNavItems
+      : normalizeUserType(user.type) === 'platform_admin'
+      ? adminNavItems
       : publicNavItems
     : publicNavItems;
 
