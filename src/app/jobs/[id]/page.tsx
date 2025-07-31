@@ -74,77 +74,78 @@ export default function JobDetailsPage() {
 
   useEffect(() => {
     if (params.id) {
+      console.log('user', user)
       fetchJobDetails(params.id as string);
     }
   }, [params.id]);
 
   const fetchJobDetails = async (jobId: string) => {
     try {
-      // const response = await api.get(`/jobs/${jobId}`);
-      // setJob(response.data);
+      const response = await api.get(`/jobs/${jobId}`);
+      setJob(response.data);
       
       // Mock data for now
-      const mockJob: JobDetails = {
-        jobID: jobId,
-        title: 'Senior Frontend Developer',
-        company: {
-          companyID: '1',
-          name: 'TechCo Rwanda',
-          location: 'Kigali, Rwanda',
-          description: 'TechCo Rwanda is a leading technology company focused on building innovative solutions for African markets.',
-          size: '50-200 employees',
-          industry: 'Technology',
-        },
-        location: 'Kigali, Rwanda',
-        type: 'full-time',
-        salary: {
-          min: 1500000,
-          max: 2500000,
-          currency: 'RWF',
-        },
-        description: `We are looking for a skilled Senior Frontend Developer to join our growing team. You will be responsible for building and maintaining high-quality web applications using modern technologies. This is an excellent opportunity to work on challenging projects that impact thousands of users across Africa.
+//       const mockJob: JobDetails = {
+//         jobID: jobId,
+//         title: 'Senior Frontend Developer',
+//         company: {
+//           companyID: '1',
+//           name: 'TechCo Rwanda',
+//           location: 'Kigali, Rwanda',
+//           description: 'TechCo Rwanda is a leading technology company focused on building innovative solutions for African markets.',
+//           size: '50-200 employees',
+//           industry: 'Technology',
+//         },
+//         location: 'Kigali, Rwanda',
+//         type: 'full-time',
+//         salary: {
+//           min: 1500000,
+//           max: 2500000,
+//           currency: 'RWF',
+//         },
+//         description: `We are looking for a skilled Senior Frontend Developer to join our growing team. You will be responsible for building and maintaining high-quality web applications using modern technologies. This is an excellent opportunity to work on challenging projects that impact thousands of users across Africa.
 
-Our ideal candidate is passionate about creating exceptional user experiences and has a strong background in React and modern JavaScript frameworks. You'll work closely with our design and backend teams to deliver scalable solutions.`,
-        responsibilities: [
-          'Develop and maintain responsive web applications using React and Next.js',
-          'Collaborate with designers to implement pixel-perfect UI components',
-          'Optimize applications for maximum speed and scalability',
-          'Participate in code reviews and maintain high code quality standards',
-          'Mentor junior developers and contribute to technical documentation',
-          'Work with backend developers to integrate APIs and services',
-        ],
-        requirements: [
-          '5+ years of experience in frontend development',
-          'Expert knowledge of React, TypeScript, and modern JavaScript',
-          'Experience with Next.js and server-side rendering',
-          'Strong understanding of web performance optimization',
-          'Excellent problem-solving and communication skills',
-          'Bachelor\'s degree in Computer Science or related field',
-        ],
-        preferredQualifications: [
-          'Experience with React Native for mobile development',
-          'Knowledge of GraphQL and Apollo Client',
-          'Familiarity with AWS or other cloud platforms',
-          'Contributions to open-source projects',
-          'Experience working in agile environments',
-        ],
-        skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Node.js', 'GraphQL', 'Git', 'AWS'],
-        benefits: [
-          'Competitive salary and performance bonuses',
-          'Health insurance for you and your family',
-          'Flexible working hours and remote work options',
-          'Professional development budget',
-          'Modern office space in Kigali Innovation City',
-          'Team building activities and annual retreats',
-        ],
-        postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        applicants: 23,
-        saved: false,
-        applied: false,
-      };
+// Our ideal candidate is passionate about creating exceptional user experiences and has a strong background in React and modern JavaScript frameworks. You'll work closely with our design and backend teams to deliver scalable solutions.`,
+//         responsibilities: [
+//           'Develop and maintain responsive web applications using React and Next.js',
+//           'Collaborate with designers to implement pixel-perfect UI components',
+//           'Optimize applications for maximum speed and scalability',
+//           'Participate in code reviews and maintain high code quality standards',
+//           'Mentor junior developers and contribute to technical documentation',
+//           'Work with backend developers to integrate APIs and services',
+//         ],
+//         requirements: [
+//           '5+ years of experience in frontend development',
+//           'Expert knowledge of React, TypeScript, and modern JavaScript',
+//           'Experience with Next.js and server-side rendering',
+//           'Strong understanding of web performance optimization',
+//           'Excellent problem-solving and communication skills',
+//           'Bachelor\'s degree in Computer Science or related field',
+//         ],
+//         preferredQualifications: [
+//           'Experience with React Native for mobile development',
+//           'Knowledge of GraphQL and Apollo Client',
+//           'Familiarity with AWS or other cloud platforms',
+//           'Contributions to open-source projects',
+//           'Experience working in agile environments',
+//         ],
+//         skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Node.js', 'GraphQL', 'Git', 'AWS'],
+//         benefits: [
+//           'Competitive salary and performance bonuses',
+//           'Health insurance for you and your family',
+//           'Flexible working hours and remote work options',
+//           'Professional development budget',
+//           'Modern office space in Kigali Innovation City',
+//           'Team building activities and annual retreats',
+//         ],
+//         postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+//         applicationDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+//         applicants: 23,
+//         saved: false,
+//         applied: false,
+//       };
       
-      setJob(mockJob);
+//       setJob(mockJob);
     } catch (error) {
       console.error('Failed to fetch job details:', error);
     } finally {
@@ -160,10 +161,10 @@ Our ideal candidate is passionate about creating exceptional user experiences an
 
     try {
       setApplying(true);
-      // await api.post(`/applications`, { jobID: job?.jobID });
+      await api.post(`/applications`, { jobID: job?.jobID });
       
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // await new Promise(resolve => setTimeout(resolve, 2000));
       
       setApplicationStatus('success');
       if (job) {
@@ -252,7 +253,7 @@ Our ideal candidate is passionate about creating exceptional user experiences an
                   </div>
                   <div className="flex items-center gap-2">
                     <Briefcase className="w-5 h-5" />
-                    <span className="capitalize">{job.type.replace('-', ' ')}</span>
+                    <span className="capitalize">{job.jobType.replace('-', ' ')}</span>
                   </div>
                 </div>
               </div>
@@ -348,7 +349,7 @@ Our ideal candidate is passionate about creating exceptional user experiences an
                       <div>
                         <h3 className="text-lg font-semibold mb-3">Preferred Qualifications</h3>
                         <ul className="space-y-2">
-                          {job.preferredQualifications.map((qual, index) => (
+                          {job.requirements.map((qual, index) => (
                             <li key={index} className="flex items-start gap-2">
                               <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                               <span className="text-gray-600 dark:text-gray-400">{qual}</span>
@@ -360,7 +361,7 @@ Our ideal candidate is passionate about creating exceptional user experiences an
                       <div>
                         <h3 className="text-lg font-semibold mb-3">Required Skills</h3>
                         <div className="flex flex-wrap gap-2">
-                          {job.skills.map((skill, index) => (
+                          {job.skillsRequired.map((skill, index) => (
                             <Badge 
                               key={index} 
                               variant="secondary"

@@ -34,27 +34,54 @@ import api from '@/lib/api';
 
 interface Application {
   applicationID: string;
-  jobID: string;
-  job: {
-    title: string;
-    company: string;
-    location: string;
-    type: string;
-    salary?: {
-      min: number;
-      max: number;
-      currency: string;
-    };
+  status: 'submitted' | 'under_review' | 'shortlisted' | 'interviewed' | 'accepted' | 'rejected' | 'withdrawn';
+  coverLetter?: string;
+  recruiterNotes?: string;
+  studentNotes?: string;
+  statusHistory: Array<{
+    status: string;
+    changedAt: string;
+    changedBy: string;
+    notes?: string;
+  }>;
+  interviewInfo?: {
+    scheduledDate?: string;
+    type?: string;
+    location?: string;
+    interviewer?: string;
   };
-  status: 'submitted' | 'under_review' | 'shortlisted' | 'interview_scheduled' | 'rejected' | 'accepted';
-  appliedDate: string;
-  lastUpdated: string;
-  notes?: string;
-  interviewDate?: string;
-  documents: {
-    resume: boolean;
-    coverLetter: boolean;
-    portfolio: boolean;
+  score?: number;
+  skillsMatchPercentage?: number;
+  expectedSalary?: {
+    amount: number;
+    currency: string;
+    period: string;
+  };
+  availabilityDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  job: {
+    jobID: string;
+    title: string;
+    description: string;
+    location?: string;
+    jobType: string;
+    experienceLevel: string;
+    salary?: {
+      min?: number;
+      max?: number;
+      currency: string;
+      period?: string;
+    };
+    company: {
+      companyID: string;
+      name: string;
+      description?: string;
+      industry?: string;
+      location?: string;
+      website?: string;
+      logo?: string;
+    };
   };
 }
 
@@ -62,9 +89,10 @@ const statusConfig = {
   submitted: { color: 'bg-blue-100 text-blue-700', icon: Clock, label: 'Submitted' },
   under_review: { color: 'bg-yellow-100 text-yellow-700', icon: Eye, label: 'Under Review' },
   shortlisted: { color: 'bg-purple-100 text-purple-700', icon: Sparkles, label: 'Shortlisted' },
-  interview_scheduled: { color: 'bg-indigo-100 text-indigo-700', icon: Calendar, label: 'Interview Scheduled' },
+  interviewed: { color: 'bg-indigo-100 text-indigo-700', icon: Calendar, label: 'Interviewed' },
   rejected: { color: 'bg-red-100 text-red-700', icon: XCircle, label: 'Rejected' },
   accepted: { color: 'bg-green-100 text-green-700', icon: CheckCircle, label: 'Accepted' },
+  withdrawn: { color: 'bg-gray-100 text-gray-700', icon: AlertCircle, label: 'Withdrawn' },
 };
 
 const ApplicationCard = ({ application }: { application: Application }) => {
@@ -84,14 +112,14 @@ const ApplicationCard = ({ application }: { application: Application }) => {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-xl hover:text-blue-600 transition-colors">
-                <Link href={`/jobs/${application.jobID}`}>{application.job.title}</Link>
+                <Link href={`/jobs/${application.job.jobID}`}>{application.job.title}</Link>
               </CardTitle>
               <CardDescription className="flex items-center gap-2 mt-1">
                 <Building className="w-4 h-4" />
-                <span>{application.job.company}</span>
+                <span>{application.job.company.name}</span>
                 <span className="text-gray-400">•</span>
                 <MapPin className="w-4 h-4" />
-                <span>{application.job.location}</span>
+                <span>{application.job.location || 'Remote'}</span>
               </CardDescription>
             </div>
             <Badge className={statusInfo.color}>
@@ -104,44 +132,65 @@ const ApplicationCard = ({ application }: { application: Application }) => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">Applied: {new Date(application.appliedDate).toLocaleDateString()}</span>
+              <span className="text-gray-600">Applied: {new Date(application.createdAt).toLocaleDateString()}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">Updated: {new Date(application.lastUpdated).toLocaleDateString()}</span>
+              <span className="text-gray-600">Updated: {new Date(application.updatedAt).toLocaleDateString()}</span>
             </div>
           </div>
 
-          {application.interviewDate && (
+          {application.interviewInfo?.scheduledDate && (
             <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-indigo-600" />
                 <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                  Interview scheduled: {new Date(application.interviewDate).toLocaleString()}
+                  Interview scheduled: {new Date(application.interviewInfo.scheduledDate).toLocaleString()}
                 </span>
               </div>
+              {application.interviewInfo.type && (
+                <p className="text-xs text-indigo-600 mt-1">Type: {application.interviewInfo.type}</p>
+              )}
+              {application.interviewInfo.location && (
+                <p className="text-xs text-indigo-600">Location: {application.interviewInfo.location}</p>
+              )}
             </div>
           )}
 
+          {/* Expected Salary */}
+          {application.expectedSalary && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-500">Expected Salary:</span>
+              <span className="font-medium">
+                {application.expectedSalary.amount} {application.expectedSalary.currency} / {application.expectedSalary.period}
+              </span>
+            </div>
+          )}
+
+          {/* Skills Match */}
+          {application.skillsMatchPercentage && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-500">Skills Match:</span>
+              <Badge variant="outline" className="text-green-600">
+                {application.skillsMatchPercentage}% match
+              </Badge>
+            </div>
+          )}
+
+          {/* Documents/Cover Letter */}
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-500">Documents:</span>
+            <span className="text-gray-500">Submitted:</span>
             <div className="flex gap-2">
-              {application.documents.resume && (
-                <Badge variant="outline" className="text-green-600">
-                  <FileText className="w-3 h-3 mr-1" />
-                  Resume
-                </Badge>
-              )}
-              {application.documents.coverLetter && (
+              {application.coverLetter && (
                 <Badge variant="outline" className="text-green-600">
                   <FileText className="w-3 h-3 mr-1" />
                   Cover Letter
                 </Badge>
               )}
-              {application.documents.portfolio && (
-                <Badge variant="outline" className="text-green-600">
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  Portfolio
+              {application.expectedSalary && (
+                <Badge variant="outline" className="text-blue-600">
+                  <FileText className="w-3 h-3 mr-1" />
+                  Salary Info
                 </Badge>
               )}
             </div>
@@ -182,72 +231,8 @@ export default function ApplicationsPage() {
 
   const fetchApplications = async () => {
     try {
-      // const response = await api.get('/applications/my-applications');
-      // setApplications(response.data);
-      
-      // Mock data
-      const mockApplications: Application[] = [
-        {
-          applicationID: '1',
-          jobID: '1',
-          job: {
-            title: 'Senior Frontend Developer',
-            company: 'TechCo Rwanda',
-            location: 'Kigali, Rwanda',
-            type: 'full-time',
-            salary: { min: 1500000, max: 2500000, currency: 'RWF' }
-          },
-          status: 'interview_scheduled',
-          appliedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          interviewDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          documents: { resume: true, coverLetter: true, portfolio: true }
-        },
-        {
-          applicationID: '2',
-          jobID: '2',
-          job: {
-            title: 'Full Stack Developer Intern',
-            company: 'InnovateLab',
-            location: 'Kigali, Rwanda',
-            type: 'internship',
-          },
-          status: 'shortlisted',
-          appliedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          documents: { resume: true, coverLetter: true, portfolio: false }
-        },
-        {
-          applicationID: '3',
-          jobID: '3',
-          job: {
-            title: 'Backend Engineer',
-            company: 'StartupHub',
-            location: 'Nairobi, Kenya',
-            type: 'full-time',
-          },
-          status: 'under_review',
-          appliedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          documents: { resume: true, coverLetter: false, portfolio: true }
-        },
-        {
-          applicationID: '4',
-          jobID: '4',
-          job: {
-            title: 'UI/UX Designer',
-            company: 'DesignCraft',
-            location: 'Kigali, Rwanda',
-            type: 'full-time',
-          },
-          status: 'rejected',
-          appliedDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-          documents: { resume: true, coverLetter: true, portfolio: true }
-        },
-      ];
-      
-      setApplications(mockApplications);
+      const response = await api.get('/applications');
+      setApplications(response.data.applications);
     } catch (error) {
       console.error('Failed to fetch applications:', error);
     } finally {
@@ -262,7 +247,7 @@ export default function ApplicationsPage() {
     if (searchTerm) {
       filtered = filtered.filter(app =>
         app.job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.job.company.toLowerCase().includes(searchTerm.toLowerCase())
+        app.job.company.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -274,13 +259,13 @@ export default function ApplicationsPage() {
     // Sort
     switch (sortBy) {
       case 'recent':
-        filtered.sort((a, b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime());
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case 'updated':
-        filtered.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+        filtered.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
         break;
       case 'company':
-        filtered.sort((a, b) => a.job.company.localeCompare(b.job.company));
+        filtered.sort((a, b) => a.job.company.name.localeCompare(b.job.company.name));
         break;
     }
 
@@ -293,9 +278,10 @@ export default function ApplicationsPage() {
       submitted: 0,
       under_review: 0,
       shortlisted: 0,
-      interview_scheduled: 0,
+      interviewed: 0,
       rejected: 0,
       accepted: 0,
+      withdrawn: 0,
     };
 
     applications.forEach(app => {
@@ -329,7 +315,7 @@ export default function ApplicationsPage() {
                 {[
                   { label: 'Total Applications', value: statusCounts.all, icon: FileText, color: 'bg-white/20' },
                   { label: 'Under Review', value: statusCounts.under_review, icon: Eye, color: 'bg-yellow-500/20' },
-                  { label: 'Interviews', value: statusCounts.interview_scheduled, icon: Calendar, color: 'bg-indigo-500/20' },
+                  { label: 'Interviews', value: statusCounts.interviewed, icon: Calendar, color: 'bg-indigo-500/20' },
                   { label: 'Offers', value: statusCounts.accepted, icon: CheckCircle, color: 'bg-green-500/20' },
                 ].map((stat, index) => (
                   <motion.div
@@ -375,9 +361,10 @@ export default function ApplicationsPage() {
                       <SelectItem value="submitted">Submitted ({statusCounts.submitted})</SelectItem>
                       <SelectItem value="under_review">Under Review ({statusCounts.under_review})</SelectItem>
                       <SelectItem value="shortlisted">Shortlisted ({statusCounts.shortlisted})</SelectItem>
-                      <SelectItem value="interview_scheduled">Interview ({statusCounts.interview_scheduled})</SelectItem>
+                      <SelectItem value="interviewed">Interviewed ({statusCounts.interviewed})</SelectItem>
                       <SelectItem value="rejected">Rejected ({statusCounts.rejected})</SelectItem>
                       <SelectItem value="accepted">Accepted ({statusCounts.accepted})</SelectItem>
+                      <SelectItem value="withdrawn">Withdrawn ({statusCounts.withdrawn})</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={sortBy} onValueChange={setSortBy}>

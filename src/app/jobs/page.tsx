@@ -106,7 +106,7 @@ const JobCard = ({ job, onSave }: { job: Job; onSave: (jobId: string) => void })
           </p>
 
           <div className="flex flex-wrap gap-2">
-            {job.skills.slice(0, 4).map((skill, index) => (
+            {job.skillsRequired.slice(0, 4).map((skill, index) => (
               <Badge 
                 key={index} 
                 variant="secondary"
@@ -115,15 +115,15 @@ const JobCard = ({ job, onSave }: { job: Job; onSave: (jobId: string) => void })
                 {skill}
               </Badge>
             ))}
-            {job.skills.length > 4 && (
-              <Badge variant="outline">+{job.skills.length - 4} more</Badge>
+            {job.skillsRequired.length > 4 && (
+              <Badge variant="outline">+{job.skillsRequired.length - 4} more</Badge>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <Briefcase className="w-4 h-4" />
-              <span className="capitalize">{job.type.replace('-', ' ')}</span>
+              <span className="capitalize">{job.jobType.replace('-', ' ')}</span>
             </div>
             {job.salary && (
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -176,9 +176,11 @@ export default function JobsPage() {
 
   const fetchJobs = async () => {
     try {
-      // const response = await api.get('/jobs');
-      // setJobs(response.data);
-      
+      const response = await api.get('/jobs');
+      setJobs(response.data.jobs);
+      setFilteredJobs(response.data.jobs);
+
+
       // Mock data for now
       const mockJobs: Job[] = [
         {
@@ -244,8 +246,8 @@ export default function JobsPage() {
         },
       ];
       
-      setJobs(mockJobs);
-      setFilteredJobs(mockJobs);
+      // setJobs(mockJobs);
+      // setFilteredJobs(mockJobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
     } finally {

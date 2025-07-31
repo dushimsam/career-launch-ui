@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   ArrowLeft,
   Search,
@@ -24,25 +25,84 @@ import {
   GraduationCap,
   Mail,
   Phone,
-  ExternalLink
+  ExternalLink,
+  AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import api from '@/lib/api';
 
 interface Application {
-  id: string;
-  jobId: string;
-  jobTitle: string;
-  candidateId: string;
-  candidateName: string;
-  candidateEmail: string;
-  candidatePhone: string;
-  candidateEducation: string;
-  candidateSkills: string[];
-  appliedAt: string;
-  status: 'pending' | 'reviewing' | 'shortlisted' | 'rejected';
-  resumeUrl?: string;
-  portfolioUrl?: string;
+  applicationID: string;
+  status: 'submitted' | 'under_review' | 'shortlisted' | 'interviewed' | 'accepted' | 'rejected' | 'withdrawn';
   coverLetter?: string;
+  recruiterNotes?: string;
+  studentNotes?: string;
+  statusHistory: Array<{
+    status: string;
+    changedAt: string;
+    changedBy: string;
+    notes?: string;
+  }>;
+  interviewInfo?: {
+    scheduledDate?: string;
+    type?: string;
+    location?: string;
+    interviewer?: string;
+  };
+  score?: number;
+  skillsMatchPercentage?: number;
+  expectedSalary?: {
+    amount: number;
+    currency: string;
+    period: string;
+  };
+  availabilityDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  student: {
+    userID: string;
+    name: string;
+    email: string;
+    phoneNumber?: string;
+    profile?: {
+      bio?: string;
+      skills?: string[];
+      experience?: Array<{
+        title: string;
+        company: string;
+        startDate: string;
+        endDate?: string;
+        description?: string;
+      }>;
+      education?: Array<{
+        degree: string;
+        institution: string;
+        graduationYear: number;
+        grade?: string;
+      }>;
+      certifications?: Array<{
+        name: string;
+        issuer: string;
+        issueDate: string;
+        expiryDate?: string;
+      }>;
+      projects?: Array<{
+        name: string;
+        description: string;
+        technologies: string[];
+        url?: string;
+        githubUrl?: string;
+      }>;
+    };
+  };
+  job: {
+    jobID: string;
+    title: string;
+    description: string;
+    location?: string;
+    jobType: string;
+    experienceLevel: string;
+  };
 }
 
 export default function ApplicationsPage() {
@@ -53,6 +113,8 @@ export default function ApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [jobFilter, setJobFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [updateLoading, setUpdateLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchApplications();
@@ -64,60 +126,13 @@ export default function ApplicationsPage() {
 
   const fetchApplications = async () => {
     setIsLoading(true);
+    setError('');
     try {
-      // TODO: Replace with actual API call
-      // Mock data for now
-      const mockApplications: Application[] = [
-        {
-          id: '1',
-          jobId: 'job1',
-          jobTitle: 'Frontend Developer',
-          candidateId: 'cand1',
-          candidateName: 'John Doe',
-          candidateEmail: 'john.doe@example.com',
-          candidatePhone: '+250788123456',
-          candidateEducation: 'BSc Computer Science, University of Rwanda',
-          candidateSkills: ['React', 'TypeScript', 'Node.js', 'Git'],
-          appliedAt: '2024-01-10T10:00:00Z',
-          status: 'pending',
-          resumeUrl: '/resumes/john-doe.pdf',
-          portfolioUrl: 'https://github.com/johndoe',
-          coverLetter: 'I am excited to apply for this position...'
-        },
-        {
-          id: '2',
-          jobId: 'job1',
-          jobTitle: 'Frontend Developer',
-          candidateId: 'cand2',
-          candidateName: 'Jane Smith',
-          candidateEmail: 'jane.smith@example.com',
-          candidatePhone: '+250788234567',
-          candidateEducation: 'BSc Software Engineering, ALU',
-          candidateSkills: ['Vue.js', 'JavaScript', 'CSS', 'HTML'],
-          appliedAt: '2024-01-09T14:30:00Z',
-          status: 'shortlisted',
-          resumeUrl: '/resumes/jane-smith.pdf',
-          portfolioUrl: 'https://janesmith.dev'
-        },
-        {
-          id: '3',
-          jobId: 'job2',
-          jobTitle: 'Backend Developer',
-          candidateId: 'cand3',
-          candidateName: 'Mike Johnson',
-          candidateEmail: 'mike.j@example.com',
-          candidatePhone: '+250788345678',
-          candidateEducation: 'BSc Information Technology, AUCA',
-          candidateSkills: ['Python', 'Django', 'PostgreSQL', 'Docker'],
-          appliedAt: '2024-01-08T09:15:00Z',
-          status: 'reviewing',
-          resumeUrl: '/resumes/mike-johnson.pdf'
-        }
-      ];
-      
-      setApplications(mockApplications);
-    } catch (error) {
+      const response = await api.get('/applications');
+      setApplications(response.data.applications);
+    } catch (error: any) {
       console.error('Error fetching applications:', error);
+      setError(error.response?.data?.message || 'Failed to fetch applications');
     } finally {
       setIsLoading(false);
     }
@@ -129,9 +144,9 @@ export default function ApplicationsPage() {
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(app => 
-        app.candidateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.candidateEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        app.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.job.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -142,42 +157,62 @@ export default function ApplicationsPage() {
 
     // Job filter
     if (jobFilter !== 'all') {
-      filtered = filtered.filter(app => app.jobId === jobFilter);
+      filtered = filtered.filter(app => app.job.jobID === jobFilter);
     }
 
     setFilteredApplications(filtered);
   };
 
-  const updateApplicationStatus = async (applicationId: string, newStatus: Application['status']) => {
+  const updateApplicationStatus = async (applicationId: string, newStatus: Application['status'], notes?: string) => {
+    setUpdateLoading(applicationId);
     try {
-      // TODO: Replace with actual API call
+      await api.patch(`/applications/${applicationId}/status`, {
+        status: newStatus,
+        recruiterNotes: notes
+      });
+      
+      // Update local state
       setApplications(prev => 
         prev.map(app => 
-          app.id === applicationId ? { ...app, status: newStatus } : app
+          app.applicationID === applicationId ? { 
+            ...app, 
+            status: newStatus,
+            recruiterNotes: notes || app.recruiterNotes,
+            updatedAt: new Date().toISOString()
+          } : app
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating application status:', error);
+      setError(error.response?.data?.message || 'Failed to update application status');
+    } finally {
+      setUpdateLoading(null);
     }
   };
 
   const getStatusColor = (status: Application['status']) => {
     switch (status) {
-      case 'pending':
+      case 'submitted':
         return 'bg-yellow-100 text-yellow-800';
-      case 'reviewing':
+      case 'under_review':
         return 'bg-blue-100 text-blue-800';
       case 'shortlisted':
         return 'bg-green-100 text-green-800';
+      case 'interviewed':
+        return 'bg-purple-100 text-purple-800';
+      case 'accepted':
+        return 'bg-emerald-100 text-emerald-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
+      case 'withdrawn':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getUniqueJobs = () => {
-    const jobs = applications.map(app => ({ id: app.jobId, title: app.jobTitle }));
+    const jobs = applications.map(app => ({ id: app.job.jobID, title: app.job.title }));
     return Array.from(new Map(jobs.map(job => [job.id, job])).values());
   };
 
@@ -207,6 +242,13 @@ export default function ApplicationsPage() {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           {/* Filters */}
           <Card className="mb-6">
             <CardHeader>
@@ -232,10 +274,13 @@ export default function ApplicationsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="reviewing">Reviewing</SelectItem>
+                    <SelectItem value="submitted">Submitted</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
                     <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                    <SelectItem value="interviewed">Interviewed</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="withdrawn">Withdrawn</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -269,11 +314,11 @@ export default function ApplicationsPage() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+                <CardTitle className="text-sm font-medium">Under Review</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {applications.filter(app => app.status === 'pending').length}
+                  {applications.filter(app => app.status === 'submitted' || app.status === 'under_review').length}
                 </div>
               </CardContent>
             </Card>
@@ -317,17 +362,17 @@ export default function ApplicationsPage() {
               </Card>
             ) : (
               filteredApplications.map((application) => (
-                <Card key={application.id} className="overflow-hidden">
+                <Card key={application.applicationID} className="overflow-hidden">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-lg">{application.candidateName}</CardTitle>
+                        <CardTitle className="text-lg">{application.student.name}</CardTitle>
                         <CardDescription>
-                          Applied for: <span className="font-medium">{application.jobTitle}</span>
+                          Applied for: <span className="font-medium">{application.job.title}</span>
                         </CardDescription>
                       </div>
                       <Badge className={getStatusColor(application.status)}>
-                        {application.status}
+                        {application.status.replace('_', ' ')}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -336,38 +381,80 @@ export default function ApplicationsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center gap-2 text-sm">
                         <Mail className="h-4 w-4 text-gray-400" />
-                        <a href={`mailto:${application.candidateEmail}`} className="hover:underline">
-                          {application.candidateEmail}
+                        <a href={`mailto:${application.student.email}`} className="hover:underline">
+                          {application.student.email}
                         </a>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-gray-400" />
-                        <a href={`tel:${application.candidatePhone}`} className="hover:underline">
-                          {application.candidatePhone}
-                        </a>
-                      </div>
+                      {application.student.phoneNumber && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="h-4 w-4 text-gray-400" />
+                          <a href={`tel:${application.student.phoneNumber}`} className="hover:underline">
+                            {application.student.phoneNumber}
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {/* Education */}
-                    <div className="flex items-start gap-2">
-                      <GraduationCap className="h-4 w-4 text-gray-400 mt-0.5" />
-                      <span className="text-sm">{application.candidateEducation}</span>
-                    </div>
+                    {application.student.profile?.education && application.student.profile.education.length > 0 && (
+                      <div className="flex items-start gap-2">
+                        <GraduationCap className="h-4 w-4 text-gray-400 mt-0.5" />
+                        <div className="text-sm">
+                          {application.student.profile.education.map((edu, index) => (
+                            <div key={index}>
+                              {edu.degree} - {edu.institution} ({edu.graduationYear})
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Skills */}
-                    <div className="flex flex-wrap gap-2">
-                      {application.candidateSkills.map((skill) => (
-                        <Badge key={skill} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
+                    {application.student.profile?.skills && (
+                      <div className="flex flex-wrap gap-2">
+                        {application.student.profile.skills.map((skill) => (
+                          <Badge key={skill} variant="secondary">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Expected Salary */}
+                    {application.expectedSalary && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>Expected Salary: {application.expectedSalary.amount} {application.expectedSalary.currency} / {application.expectedSalary.period}</span>
+                      </div>
+                    )}
+
+                    {/* Skills Match */}
+                    {application.skillsMatchPercentage && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>Skills Match: {application.skillsMatchPercentage}%</span>
+                      </div>
+                    )}
 
                     {/* Applied Date */}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="h-4 w-4" />
-                      Applied {new Date(application.appliedAt).toLocaleDateString()}
+                      Applied {new Date(application.createdAt).toLocaleDateString()}
                     </div>
+
+                    {/* Cover Letter */}
+                    {application.coverLetter && (
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <h4 className="text-sm font-medium mb-2">Cover Letter</h4>
+                        <p className="text-sm text-gray-600">{application.coverLetter}</p>
+                      </div>
+                    )}
+
+                    {/* Recruiter Notes */}
+                    {application.recruiterNotes && (
+                      <div className="bg-blue-50 p-3 rounded-md">
+                        <h4 className="text-sm font-medium mb-2">Recruiter Notes</h4>
+                        <p className="text-sm text-gray-600">{application.recruiterNotes}</p>
+                      </div>
+                    )}
 
                     {/* Actions */}
                     <div className="flex flex-wrap gap-2 pt-4 border-t">
@@ -376,45 +463,60 @@ export default function ApplicationsPage() {
                         View Profile
                       </Button>
                       
-                      {application.resumeUrl && (
-                        <Button size="sm" variant="outline">
-                          <Download className="mr-2 h-4 w-4" />
-                          Resume
-                        </Button>
-                      )}
-                      
-                      {application.portfolioUrl && (
-                        <a 
-                          href={application.portfolioUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-                        >
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          Portfolio
-                        </a>
+                      {/* Portfolio Links */}
+                      {application.student.profile?.projects && application.student.profile.projects.length > 0 && (
+                        <div className="flex gap-2">
+                          {application.student.profile.projects.slice(0, 2).map((project, index) => (
+                            project.url && (
+                              <a 
+                                key={index}
+                                href={project.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                              >
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                {project.name}
+                              </a>
+                            )
+                          ))}
+                        </div>
                       )}
 
                       <div className="ml-auto flex gap-2">
-                        {application.status !== 'shortlisted' && (
+                        {application.status === 'submitted' && (
                           <Button
                             size="sm"
                             variant="default"
-                            onClick={() => updateApplicationStatus(application.id, 'shortlisted')}
+                            onClick={() => updateApplicationStatus(application.applicationID, 'under_review')}
+                            disabled={updateLoading === application.applicationID}
                           >
-                            <UserCheck className="mr-2 h-4 w-4" />
-                            Shortlist
+                            <Clock className="mr-2 h-4 w-4" />
+                            {updateLoading === application.applicationID ? 'Updating...' : 'Review'}
                           </Button>
                         )}
                         
-                        {application.status !== 'rejected' && (
+                        {(application.status === 'under_review' || application.status === 'submitted') && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => updateApplicationStatus(application.applicationID, 'shortlisted')}
+                            disabled={updateLoading === application.applicationID}
+                          >
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            {updateLoading === application.applicationID ? 'Updating...' : 'Shortlist'}
+                          </Button>
+                        )}
+                        
+                        {application.status !== 'rejected' && application.status !== 'withdrawn' && (
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => updateApplicationStatus(application.id, 'rejected')}
+                            onClick={() => updateApplicationStatus(application.applicationID, 'rejected')}
+                            disabled={updateLoading === application.applicationID}
                           >
                             <UserX className="mr-2 h-4 w-4" />
-                            Reject
+                            {updateLoading === application.applicationID ? 'Updating...' : 'Reject'}
                           </Button>
                         )}
                       </div>
