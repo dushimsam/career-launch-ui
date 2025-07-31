@@ -34,43 +34,30 @@ import {
   Building,
   Calendar,
   CheckCircle,
-  Clock,
   AlertCircle,
-  BarChart3,
-  PieChart,
   Mail,
-  Phone,
   Globe,
   MapPin,
-  BookOpen,
   Target,
   Sparkles,
   UserCheck,
-  UserX,
   Search,
   Filter,
-  Download,
-  LogOut,
   Plus,
   Eye,
-  ChevronRight,
 } from "lucide-react";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
   PieChart as RePieChart,
   Pie,
   Cell,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Legend,
-  Area,
-  AreaChart,
 } from "recharts";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -93,13 +80,6 @@ const departmentDistribution = [
   { name: "Others", value: 32, color: "#6B7280" },
 ];
 
-const topEmployers = [
-  { company: "TechCo Rwanda", hires: 15, logo: "🏢" },
-  { company: "InnovateLab", hires: 12, logo: "💡" },
-  { company: "StartupHub", hires: 8, logo: "🚀" },
-  { company: "FinTech Solutions", hires: 6, logo: "💰" },
-  { company: "HealthTech Africa", hires: 5, logo: "🏥" },
-];
 
 interface UniversityStats {
   totalStudents: number;
@@ -185,10 +165,8 @@ const StatCard = ({
 };
 
 export default function UniversityDashboard() {
-  const { user, logout } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState("6months");
-  const [stats, setStats] = useState<UniversityStats>({
+  const { user } = useAuth();
+  const [stats] = useState<UniversityStats>({
     totalStudents: 405,
     activeStudents: 342,
     alumniCount: 1250,
@@ -211,13 +189,7 @@ export default function UniversityDashboard() {
   useEffect(() => {
     console.log("Fetching dashboard data...");
     fetchDashboardData();
-  }, [timeRange]);
-
-  useEffect(() => {
-    if (companies.length > 0) {
-      filterCompanies();
-    }
-  }, [filterCompanies]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -248,7 +220,7 @@ export default function UniversityDashboard() {
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
-      setLoading(false);
+      // Dashboard data loaded
     }
   };
 
@@ -297,6 +269,12 @@ export default function UniversityDashboard() {
   useEffect(() => {
     fetchCompanies();
   }, []);
+
+  useEffect(() => {
+    if (companies.length > 0) {
+      filterCompanies();
+    }
+  }, [companies.length, filterCompanies]);
 
   const getUniqueIndustries = () => {
     const industries = companies
@@ -431,7 +409,7 @@ export default function UniversityDashboard() {
             <Tabs
               defaultValue="overview"
               className="space-y-4"
-              onValueChange={(value) => {
+              onValueChange={() => {
                 if (companies.length === 0) {
                   fetchCompanies();
                 }
@@ -850,11 +828,11 @@ export default function UniversityDashboard() {
                                   <div className="flex items-center gap-3 mb-2">
                                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                                       {company.logo ? (
-                                        <img
-                                          src={company.logo}
-                                          alt={company.name}
-                                          className="w-8 h-8 rounded"
-                                        />
+                                        <div
+                                          className="w-8 h-8 rounded bg-blue-500 flex items-center justify-center text-white text-sm font-semibold"
+                                        >
+                                          {company.name.charAt(0)}
+                                        </div>
                                       ) : (
                                         <Building className="w-6 h-6 text-gray-400" />
                                       )}
